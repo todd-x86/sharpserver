@@ -22,12 +22,10 @@ namespace SharpServer
 		}
 		
 		[Route(Url="/cooldude")]
-		public static void Cool(HttpListenerResponse resp)
+		public static Response Cool(HttpListenerRequest req)
 		{
 			Console.WriteLine("I'M COOL");
-			StreamWriter w = new StreamWriter(resp.OutputStream);
-			w.WriteLine("I'm 2cool4u!");
-			w.Close();
+			return new StringResponse("I'm 2cool4u!");
 		}
 	}
 }

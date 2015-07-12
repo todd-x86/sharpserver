@@ -22,12 +22,10 @@ namespace SharpServer
 		}
 		
 		[Route(Url="/login")]
-		public static void Login(HttpListenerResponse resp)
+		public static Response Login(HttpListenerRequest req)
 		{
-			StreamWriter w = new StreamWriter(resp.OutputStream);
-			w.WriteLine("Hello THERE!");
-			w.Close();
 			Console.WriteLine("LOGIN!");
+			return new StringResponse("Hello THERE!");
 		}
 	}
 }
