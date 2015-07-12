@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace SharpServer
 {
-	public delegate void RouteDelegate();
+	public delegate void RouteDelegate(HttpListenerResponse response);
 	
 	/// <summary>
 	/// Description of WebServer.
@@ -61,7 +61,7 @@ namespace SharpServer
 		
 		public void AddRoute(RouteAttribute attr, object inst, MethodInfo m)
 		{
-			AddRoute(attr.Url, () => m.Invoke(inst, new object[]{}));
+			AddRoute(attr.Url, (resp) => m.Invoke(inst, new object[]{resp}));
 		}
 		
 		public void AddRoute(string url, RouteDelegate handler)
@@ -77,14 +77,11 @@ namespace SharpServer
 			while (_listener.IsListening){
 				HttpListenerContext ctx = _listener.GetContext();
 				ctx.Response.ContentType = "text/html";
-				StreamWriter w = new StreamWriter(ctx.Response.OutputStream);
 				RouteDelegate handler;
 				if(_routeMap.TryGetValue(ctx.Request.Url.LocalPath.ToLower(), out handler))
 				{
-					handler.Invoke();
+					handler.Invoke(ctx.Response);
 				}
-				w.WriteLine(string.Format("<marquee>Hello {0}</marquee>", ctx.Request.Url.LocalPath));
-				w.Close();
 				ctx.Response.Close();
 			}
 		}

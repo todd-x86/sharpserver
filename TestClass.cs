@@ -7,6 +7,8 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.IO;
+using System.Net;
 
 namespace SharpServer
 {
@@ -20,9 +22,12 @@ namespace SharpServer
 		}
 		
 		[Route(Url="/cooldude")]
-		public static void Cool()
+		public static void Cool(HttpListenerResponse resp)
 		{
 			Console.WriteLine("I'M COOL");
+			StreamWriter w = new StreamWriter(resp.OutputStream);
+			w.WriteLine("I'm 2cool4u!");
+			w.Close();
 		}
 	}
 }
