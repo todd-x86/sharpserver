@@ -45,7 +45,7 @@ namespace SharpServer
 		{
 			if (!uri.StartsWith("/")) uri = '/'+uri;
 			if (!uri.EndsWith("/")) uri += '/';
-			_listener.Prefixes.Add(string.Format("http://127.0.0.1:{1}{2}", _host, _port, uri));
+			_listener.Prefixes.Add(string.Format("http://*:{1}{2}", _host, _port, uri));
 		}
 		
 		private void CheckMethods(object inst, MethodInfo[] mthds)
@@ -71,21 +71,34 @@ namespace SharpServer
 			_routeMap[url] = handler;
 		}
 		
-		public void Start()
+		public void Start(bool threadBlocking = true)
 		{
 			_listener.Start();
-			while (_listener.IsListening){
-				HttpListenerContext ctx = _listener.GetContext();
-				ctx.Response.ContentType = "text/html";
-				RouteDelegate handler;
-				if(_routeMap.TryGetValue(ctx.Request.Url.LocalPath.ToLower(), out handler))
-				{
-					Response rsp = handler.Invoke(ctx.Request);
-					if (rsp != null)
-						rsp.WriteTo(ctx.Response);
+			if (threadBlocking) {
+				while (_listener.IsListening){
+					HandleContext(_listener.GetContext());
 				}
-				ctx.Response.Close();
+			} else {
+				_listener.BeginGetContext(ReceiveContext, null);
 			}
+		}
+		
+		private void ReceiveContext(IAsyncResult result)
+		{
+			HttpListenerContext ctx = _listener.EndGetContext(result);
+			HandleContext(ctx);
+		}
+		
+		private void HandleContext (HttpListenerContext ctx)
+		{
+			RouteDelegate handler;
+			if(_routeMap.TryGetValue(ctx.Request.Url.LocalPath.ToLower(), out handler))
+			{
+				Response rsp = handler.Invoke(ctx.Request);
+				if (rsp != null)
+					rsp.WriteTo(ctx.Response);
+			}
+			ctx.Response.Close();
 		}
 		
 		public void Stop()

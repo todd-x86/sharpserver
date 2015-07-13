@@ -26,6 +26,7 @@ namespace SharpServer
 		
 		public override void WriteTo (HttpListenerResponse r)
 		{
+			r.ContentType = "text/html";
 			StreamWriter w = new StreamWriter(r.OutputStream);
 			w.Write(Text);
 			w.Close();
