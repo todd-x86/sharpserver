@@ -15,17 +15,24 @@ namespace SharpServer
 	/// <summary>
 	/// Description of TestClass.
 	/// </summary>
-	public class TestClass
-	{
-		public TestClass()
-		{
-		}
-		
+	public class TestClass: Controller
+	{		
 		[Route(Url="/cooldude")]
 		public static Response Cool(HttpListenerRequest req)
 		{
-			Console.WriteLine("I'M COOL");
-			return new StringResponse("I'm 2cool4u!");
+			return AsString("I'm 2cool4u!");
+		}
+		
+		[Route(Url="/")]
+		public static Response Home(HttpListenerRequest req)
+		{
+			return AsString("Welcome <a href=\"/login\">Login</a>!");
+		}
+		
+		[Route(Url="/login")]
+		public static Response Login(HttpListenerRequest req)
+		{
+			return AsString("CANNOT LOGIN!!!!!!1!");
 		}
 	}
 }

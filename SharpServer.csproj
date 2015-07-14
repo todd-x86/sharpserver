@@ -44,8 +44,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lib\Controller.cs" />
     <Compile Include="Lib\Response.cs" />
+    <Compile Include="Lib\Responses\FileResponse.cs" />
     <Compile Include="Lib\Responses\StringResponse.cs" />
+    <Compile Include="Lib\Route.cs" />
     <Compile Include="Lib\RouteAttribute.cs" />
     <Compile Include="Lib\WebServer.cs" />
     <Compile Include="Program.cs" />

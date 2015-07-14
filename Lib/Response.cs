@@ -16,10 +16,19 @@ namespace SharpServer
 	/// </summary>
 	public abstract class Response
 	{
-		public Response()
+		public int Code { get; set; }
+		public string ContentType { get; set; }
+		
+		public Response ()
 		{
+			Code = 200;
+			ContentType = "text/html";
 		}
 		
-		public abstract void WriteTo(HttpListenerResponse resp);
+		public virtual void WriteTo(HttpListenerResponse resp)
+		{
+			resp.ContentType = ContentType;
+			resp.StatusCode = Code;
+		}
 	}
 }

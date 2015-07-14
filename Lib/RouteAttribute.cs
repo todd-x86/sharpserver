@@ -15,16 +15,11 @@ namespace SharpServer
 	/// </summary>
 	public class RouteAttribute: Attribute
 	{
-		public RouteAttribute()
-		{
-		}
-		
 		public string Url { get; set; }
 		
 		public override string ToString()
 		{
 			return string.Format("[RouteAttribute Url={0}]", Url);
 		}
-
 	}
 }

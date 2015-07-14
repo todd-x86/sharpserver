@@ -18,14 +18,8 @@ namespace SharpServer
 		{
 			WebServer ws = new WebServer(IPAddress.Parse("0.0.0.0"), 8090);
 			Console.WriteLine("Listening");
+			ws.Register(typeof(TestClass));
 			ws.Start();
-		}
-		
-		[Route(Url="/login")]
-		public static Response Login(HttpListenerRequest req)
-		{
-			Console.WriteLine("LOGIN!");
-			return new StringResponse("Hello THERE!");
 		}
 	}
 }

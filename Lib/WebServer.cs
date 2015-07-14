@@ -31,48 +31,36 @@ namespace SharpServer
 		{
 			_routeMap = new Dictionary<string, RouteDelegate>();
 			_listener = new HttpListener();
+			_listener.Prefixes.Add(string.Format("http://*:{0}/", port));
 			_host = host;
 			_port = port;
-			foreach (Type t in Assembly.GetCallingAssembly().ManifestModule.GetTypes())
+		}
+		
+		public void Register(Type t)
+		{
+			object inst = t.GetMembers()[0];
+			foreach (MethodInfo m in t.GetMethods())
 			{
-				MemberInfo[] members = t.GetMembers();
-				object inst = members[0];
-				CheckMethods(inst, t.GetMethods());
+				if (!m.IsStatic) continue;
+				foreach (object obj in m.GetCustomAttributes(true))
+					if (obj is RouteAttribute)
+						AddRoute(new Route(obj as RouteAttribute, inst, m));
 			}
 		}
 		
-		private void AddPrefix (string uri)
+		private void AddRoute(Route route)
 		{
-			if (!uri.StartsWith("/")) uri = '/'+uri;
-			if (!uri.EndsWith("/")) uri += '/';
-			_listener.Prefixes.Add(string.Format("http://*:{1}{2}", _host, _port, uri));
-		}
-		
-		private void CheckMethods(object inst, MethodInfo[] mthds)
-		{
-			foreach (MethodInfo m in mthds)
-			{
-				if (m.IsStatic)
-					foreach (object obj in m.GetCustomAttributes(true))
-						if (obj is RouteAttribute)
-							AddRoute(obj as RouteAttribute, inst, m);
-			}
-		}
-		
-		public void AddRoute(RouteAttribute attr, object inst, MethodInfo m)
-		{
-			AddRoute(attr.Url, (req) => (Response)m.Invoke(inst, new object[]{req}));
+			AddRoute(route.Uri, route.Handler);
 		}
 		
 		public void AddRoute(string url, RouteDelegate handler)
 		{
-			url = url.ToLower();
-			AddPrefix(url);
-			_routeMap[url] = handler;
+			_routeMap[NormalizeUri(url)] = handler;
 		}
 		
 		public void Start(bool threadBlocking = true)
 		{
+			// TODO: Multithreading capabilities
 			_listener.Start();
 			if (threadBlocking) {
 				while (_listener.IsListening){
@@ -89,15 +77,32 @@ namespace SharpServer
 			HandleContext(ctx);
 		}
 		
-		private void HandleContext (HttpListenerContext ctx)
+		private Response GetResponse (int httpCode, string msg)
+		{
+			Response r = new StringResponse(string.Format("{0} {1}", httpCode, msg));
+			r.Code = httpCode;
+			return r;
+		}
+		
+		private string NormalizeUri (string uri)
+		{
+			uri = uri.ToLower();
+			if (!uri.StartsWith("/")) uri = '/'+uri;
+			if (!uri.EndsWith("/")) uri += '/';
+			return uri;
+		}
+		
+		private void HandleContext(HttpListenerContext ctx)
 		{
 			RouteDelegate handler;
-			if(_routeMap.TryGetValue(ctx.Request.Url.LocalPath.ToLower(), out handler))
+			Response rsp;
+			if(_routeMap.TryGetValue(NormalizeUri(ctx.Request.Url.LocalPath), out handler))
 			{
-				Response rsp = handler.Invoke(ctx.Request);
-				if (rsp != null)
-					rsp.WriteTo(ctx.Response);
+				rsp = handler.Invoke(ctx.Request);
+			} else {
+				rsp = GetResponse(404, "Not Found");
 			}
+			rsp.WriteTo(ctx.Response);
 			ctx.Response.Close();
 		}
 		
