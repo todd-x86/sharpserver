@@ -18,6 +18,7 @@ namespace SharpServer
 		{
 			WebServer ws = new WebServer(IPAddress.Parse("0.0.0.0"), 8090);
 			Console.WriteLine("Listening");
+			ws.AddFile("testfile.html");
 			ws.Register(typeof(TestClass));
 			ws.Start();
 		}

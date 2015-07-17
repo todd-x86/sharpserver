@@ -38,6 +38,7 @@ namespace SharpServer
 		
 		public void Register(Type t)
 		{
+			// Add routes
 			object inst = t.GetMembers()[0];
 			foreach (MethodInfo m in t.GetMethods())
 			{
@@ -46,6 +47,11 @@ namespace SharpServer
 					if (obj is RouteAttribute)
 						AddRoute(new Route(obj as RouteAttribute, inst, m));
 			}
+		}
+		
+		public void AddFile(string path, string uri = null)
+		{
+			AddRoute(uri ?? path, FileResponse.BuildHandler(path));
 		}
 		
 		private void AddRoute(Route route)
@@ -103,7 +109,9 @@ namespace SharpServer
 				rsp = GetResponse(404, "Not Found");
 			}
 			rsp.WriteTo(ctx.Response);
-			ctx.Response.Close();
+			try {
+				ctx.Response.Close();
+			} catch (HttpListenerException e) {}
 		}
 		
 		public void Stop()

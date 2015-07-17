@@ -24,7 +24,7 @@ namespace SharpServer
 			Text = text;
 		}
 		
-		public override void WriteTo (HttpListenerResponse r)
+		public override void WriteTo(HttpListenerResponse r)
 		{
 			base.WriteTo(r);
 			r.ContentType = "text/html";

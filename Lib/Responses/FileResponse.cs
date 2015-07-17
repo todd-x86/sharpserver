@@ -24,11 +24,17 @@ namespace SharpServer
 			_file = file;
 		}
 		
+		public static RouteDelegate BuildHandler (string file)
+		{
+			return (r) => new FileResponse(file);
+		}
+		
 		public override void WriteTo(HttpListenerResponse resp)
 		{
 			base.WriteTo(resp);
 			FileStream fs = new FileStream(_file, FileMode.Open);
 			fs.CopyTo(resp.OutputStream);
+			fs.Close();
 		}
 	}
 }

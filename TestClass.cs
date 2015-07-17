@@ -16,7 +16,7 @@ namespace SharpServer
 	/// Description of TestClass.
 	/// </summary>
 	public class TestClass: Controller
-	{		
+	{
 		[Route(Url="/cooldude")]
 		public static Response Cool(HttpListenerRequest req)
 		{
@@ -33,6 +33,12 @@ namespace SharpServer
 		public static Response Login(HttpListenerRequest req)
 		{
 			return AsString("CANNOT LOGIN!!!!!!1!");
+		}
+		
+		[Route(Url="/test")]
+		public static Response SomeFile(HttpListenerRequest req)
+		{
+			return AsFile("testfile.html");
 		}
 	}
 }
